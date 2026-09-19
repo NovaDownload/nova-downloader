@@ -6,3 +6,5 @@ __pycache__/
 *.m4a
 *.webm
 .env
+cookies.txt
+__pycache__/
