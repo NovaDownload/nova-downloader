@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacidad — NovaDownloader</title>
+<style>
+  :root{
+    --bg:#0b0b0f; --card:#15151c; --border:#25252f;
+    --text:#f2f2f5; --muted:#8a8a99; --accent:#7c5cff; --accent-2:#4fe3c1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    display:flex; justify-content:center; padding:40px 16px 80px;
+  }
+  .wrap{width:100%; max-width:640px;}
+  a.back{color:var(--accent-2); text-decoration:none; font-size:0.85rem;}
+  h1{
+    font-size:1.6rem; margin:20px 0 6px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    display:inline-block;
+  }
+  .updated{color:var(--muted); font-size:0.8rem; margin-bottom:28px;}
+  section{margin-bottom:22px;}
+  h2{font-size:1rem; margin-bottom:8px;}
+  p, li{color:#d4d4dc; font-size:0.88rem; line-height:1.6;}
+  ul{padding-left:20px; margin-top:6px;}
+  .card{
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:20px 22px;
+  }
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:0.82rem;}
+  td, th{padding:8px 6px; border-bottom:1px solid var(--border); text-align:left; color:#d4d4dc;}
+  th{color:var(--muted); font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Volver a NovaDownloader</a>
+  <h1>Política de Privacidad</h1>
+  <div class="updated">Última actualización: septiembre de 2026</div>
+
+  <div class="card">
+    <section>
+      <h2>1. Qué datos tratamos</h2>
+      <p>NovaDownloader está diseñado para funcionar con el mínimo dato posible:</p>
+      <table>
+        <tr><th>Dato</th><th>¿Se almacena en servidor?</th></tr>
+        <tr><td>Enlace del vídeo pegado</td><td>No, solo se procesa en el momento de la petición</td></tr>
+        <tr><td>Vídeo/audio descargado</td><td>No, se genera un enlace temporal, sin copia permanente</td></tr>
+        <tr><td>Historial de descargas</td><td>No — se guarda únicamente en tu propio navegador (localStorage)</td></tr>
+        <tr><td>Preferencia de tema (claro/oscuro)</td><td>No — se guarda únicamente en tu propio navegador</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>2. Datos técnicos del servidor</h2>
+      <p>Como cualquier servicio web, el backend (alojado en Render) puede generar registros técnicos temporales (logs) con fines de depuración y seguridad, como la IP de la petición y la marca de tiempo. Estos registros no se usan con fines publicitarios ni se comparten con terceros.</p>
+    </section>
+
+    <section>
+      <h2>3. Cookies</h2>
+      <p>NovaDownloader no utiliza cookies de seguimiento ni de publicidad propias. El historial y las preferencias se guardan localmente en tu navegador mediante almacenamiento local (localStorage), que nunca sale de tu dispositivo.</p>
+    </section>
+
+    <section>
+      <h2>4. Terceros</h2>
+      <p>El servicio se conecta a las plataformas de origen (TikTok, y próximamente Instagram) únicamente para obtener el archivo solicitado por el usuario. NovaDownloader no comparte los enlaces procesados con ningún otro tercero.</p>
+    </section>
+
+    <section>
+      <h2>5. Tus derechos</h2>
+      <p>Puedes borrar tu historial de descargas en cualquier momento desde el propio botón "Borrar historial" en la web, o limpiando los datos de navegación de tu navegador. Al no almacenarse datos personales en servidor, no existe un perfil de usuario que pedir eliminar.</p>
+    </section>
+
+    <section>
+      <h2>6. Contacto</h2>
+      <p>Para consultas sobre privacidad o solicitudes relacionadas con derechos de autor, puedes contactar a través de los medios indicados en la web principal.</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaDownloader</title>
+<style>
+  :root{
+    --bg:#0b0b0f;
+    --card:#15151c;
+    --card-2:#1c1c26;
+    --border:#25252f;
+    --text:#f2f2f5;
+    --muted:#8a8a99;
+    --accent:#7c5cff;
+    --accent-2:#4fe3c1;
+    --danger:#ff5c7a;
+  }
+  [data-theme="light"]{
+    --bg:#f4f4f8;
+    --card:#ffffff;
+    --card-2:#f0f0f5;
+    --border:#e2e2ea;
+    --text:#16161f;
+    --muted:#6b6b7a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(circle at top, var(--card-2), var(--bg) 60%);
+    color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 60px;
+    transition:background .3s,color .3s;
+  }
+  .topbar{
+    width:100%;
+    max-width:480px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .theme-btn{
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text);
+    width:36px;height:36px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:0.95rem;
+  }
+  header{
+    text-align:center;
+    margin-bottom:24px;
+  }
+  .logo{
+    font-size:2rem;
+    font-weight:700;
+    letter-spacing:-0.5px;
+  }
+  .logo span{
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:0.9rem;
+    margin-top:6px;
+  }
+  .card{
+    width:100%;
+    max-width:480px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    margin-bottom:16px;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    color:var(--muted);
+    cursor:pointer;
+    font-size:0.85rem;
+    transition:all .2s;
+    background:transparent;
+  }
+  .tab.active{
+    color:var(--text);
+    border-color:var(--accent);
+    background:rgba(124,92,255,0.1);
+  }
+  .input-row{
+    display:flex;
+    gap:8px;
+  }
+  input[type="text"]{
+    flex:1;
+    background:var(--card-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px;
+    color:var(--text);
+    font-size:0.95rem;
+    outline:none;
+  }
+  input[type="text"]:focus{
+    border-color:var(--accent);
+  }
+  .icon-btn{
+    background:var(--card-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    width:46px;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:0.95rem;
+  }
+  button.go{
+    background:linear-gradient(90deg,var(--accent),#6a4bff);
+    border:none;
+    border-radius:10px;
+    padding:0 20px;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    font-size:0.95rem;
+  }
+  button.go:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+  }
+  .hint{
+    color:var(--muted);
+    font-size:0.75rem;
+    margin-top:10px;
+  }
+  .status{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.85rem;
+    margin-top:14px;
+    min-height:20px;
+  }
+  .spinner{
+    width:16px;height:16px;
+    border:2px solid var(--border);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    display:inline-block;
+    animation:spin .7s linear infinite;
+    vertical-align:middle;
+    margin-right:6px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .result{
+    margin-top:20px;
+    display:none;
+  }
+  .result.show{
+    display:block;
+  }
+  .meta{
+    display:flex;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .meta img{
+    width:64px;height:88px;
+    object-fit:cover;
+    border-radius:8px;
+    background:var(--card-2);
+  }
+  .meta-info{
+    flex:1;
+    min-width:0;
+  }
+  .meta-info .t{
+    font-size:0.9rem;
+    font-weight:600;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+  .meta-info .a{
+    color:var(--muted);
+    font-size:0.8rem;
+    margin-top:4px;
+  }
+  video{
+    width:100%;
+    border-radius:12px;
+    background:black;
+    margin-bottom:14px;
+  }
+  .quality-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .quality-btn{
+    flex:1;
+    min-width:80px;
+    text-align:center;
+    padding:10px 8px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card-2);
+    color:var(--muted);
+    font-size:0.8rem;
+    cursor:pointer;
+  }
+  .quality-btn.active{
+    border-color:var(--accent-2);
+    color:var(--text);
+    background:rgba(79,227,193,0.1);
+  }
+  .dl-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    background:var(--accent-2);
+    color:#06231c;
+    font-weight:700;
+    text-decoration:none;
+    font-size:0.95rem;
+    border:none;
+    cursor:pointer;
+  }
+  .dl-btn.secondary{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--text);
+    margin-top:8px;
+  }
+
+  .history-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .history-head h3{
+    font-size:0.9rem;
+    font-weight:600;
+  }
+  .clear-btn{
+    background:none;
+    border:none;
+    color:var(--danger);
+    font-size:0.75rem;
+    cursor:pointer;
+  }
+  .history-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px solid var(--border);
+    font-size:0.8rem;
+  }
+  .history-item:last-child{border-bottom:none;}
+  .history-item img{
+    width:36px;height:48px;
+    object-fit:cover;
+    border-radius:6px;
+    background:var(--card-2);
+  }
+  .history-item .h-title{
+    flex:1;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .history-item a{
+    color:var(--accent-2);
+    text-decoration:none;
+    font-size:0.75rem;
+  }
+  .empty{
+    color:var(--muted);
+    font-size:0.8rem;
+    text-align:center;
+    padding:8px 0;
+  }
+
+  .faq details{
+    border-bottom:1px solid var(--border);
+    padding:10px 0;
+  }
+  .faq details:last-child{border-bottom:none;}
+  .faq summary{
+    cursor:pointer;
+    font-size:0.85rem;
+    font-weight:600;
+    list-style:none;
+  }
+  .faq summary::-webkit-details-marker{display:none;}
+  .faq p{
+    color:var(--muted);
+    font-size:0.8rem;
+    margin-top:8px;
+    line-height:1.5;
+  }
+
+  footer{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:0.75rem;
+    text-align:center;
+    max-width:480px;
+    line-height:1.5;
+  }
+  footer a{color:var(--accent-2);text-decoration:none;}
+
+  .toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:0.85rem;
+    opacity:0;
+    transition:all .25s;
+    pointer-events:none;
+    z-index:99;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="topbar">
+  <div style="width:36px;"></div>
+  <button class="theme-btn" id="themeBtn" title="Cambiar tema">🌙</button>
+</div>
+
+<header>
+  <div class="logo">Nova<span>Downloader</span></div>
+  <div class="subtitle">Descarga vídeos de TikTok en HD, SD o solo audio</div>
+</header>
+
+<div class="card">
+  <div class="tabs">
+    <div class="tab active" data-platform="tiktok">TikTok</div>
+    <div class="tab" data-platform="instagram">Instagram (próximamente)</div>
+  </div>
+
+  <div class="input-row">
+    <input type="text" id="urlInput" placeholder="Pega aquí el enlace del vídeo...">
+    <button class="icon-btn" id="pasteBtn" title="Pegar desde portapapeles">📋</button>
+    <button class="go" id="goBtn">Ir</button>
+  </div>
+  <div class="hint">Solo para uso personal o con permiso del autor del contenido.</div>
+
+  <div class="status" id="status"></div>
+
+  <div class="result" id="result">
+    <div class="meta">
+      <img id="thumb" src="" alt="">
+      <div class="meta-info">
+        <div class="t" id="metaTitle">—</div>
+        <div class="a" id="metaAuthor">—</div>
+      </div>
+    </div>
+
+    <video id="preview" controls></video>
+
+    <div class="quality-row" id="qualityRow"></div>
+
+    <button class="dl-btn" id="downloadBtn">⬇ Descargar vídeo</button>
+    <button class="dl-btn secondary" id="audioBtn">🎵 Extraer solo audio (MP3)</button>
+    <button class="dl-btn secondary" id="copyBtn">🔗 Copiar enlace directo</button>
+    <button class="dl-btn secondary" id="shareBtn">📤 Compartir</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="history-head">
+    <h3>Descargas recientes</h3>
+    <button class="clear-btn" id="clearHistory">Borrar historial</button>
+  </div>
+  <div id="historyList">
+    <div class="empty">Aún no hay descargas</div>
+  </div>
+</div>
+
+<div class="card faq">
+  <details>
+    <summary>¿Es legal usar NovaDownloader?</summary>
+    <p>Está pensado para uso personal, hacer copia de seguridad de tu propio contenido o descargar vídeos con permiso del autor. No aloja ni distribuye contenido de terceros.</p>
+  </details>
+  <details>
+    <summary>¿Por qué a veces falla un enlace?</summary>
+    <p>Los vídeos privados, eliminados o con restricciones regionales pueden no procesarse. Prueba con otro enlace público.</p>
+  </details>
+  <details>
+    <summary>¿Guardáis mis vídeos en un servidor?</summary>
+    <p>No. El procesamiento es bajo demanda: se genera un enlace temporal directo hacia el archivo, no se almacena copia permanente.</p>
+  </details>
+</div>
+
+<footer>
+  NovaDownloader no aloja contenido de terceros. Los vídeos se procesan
+  bajo demanda a partir de enlaces públicos que proporciona el usuario.
+  El uso de esta herramienta es responsabilidad exclusiva de quien la utiliza.
+  Consulta nuestros <a href="terms.html">Términos y Condiciones</a> y nuestra
+  <a href="privacy.html">Política de Privacidad</a>.
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // 👉 Cambia esto por la URL de tu backend en Render
+  const API_URL = "http://127.0.0.1:8000";
+
+  const $ = (id) => document.getElementById(id);
+  const goBtn = $('goBtn');
+  const pasteBtn = $('pasteBtn');
+  const urlInput = $('urlInput');
+  const statusEl = $('status');
+  const resultEl = $('result');
+  const preview = $('preview');
+  const thumb = $('thumb');
+  const metaTitle = $('metaTitle');
+  const metaAuthor = $('metaAuthor');
+  const qualityRow = $('qualityRow');
+  const downloadBtn = $('downloadBtn');
+  const audioBtn = $('audioBtn');
+  const copyBtn = $('copyBtn');
+  const shareBtn = $('shareBtn');
+  const themeBtn = $('themeBtn');
+  const historyList = $('historyList');
+  const clearHistoryBtn = $('clearHistory');
+  const toast = $('toast');
+
+  let currentData = null;
+  let selectedQuality = null;
+
+  // ---------- Tema ----------
+  function applyTheme(mode){
+    document.body.setAttribute('data-theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('nova-theme', mode);
+  }
+  applyTheme(localStorage.getItem('nova-theme') || 'dark');
+  themeBtn.addEventListener('click', () => {
+    const current = document.body.getAttribute('data-theme');
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  // ---------- Toast ----------
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // ---------- Pegar portapapeles ----------
+  pasteBtn.addEventListener('click', async () => {
+    try{
+      const text = await navigator.clipboard.readText();
+      urlInput.value = text;
+    }catch(e){
+      showToast('No se pudo leer el portapapeles');
+    }
+  });
+
+  // ---------- Buscar / procesar ----------
+  goBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if(!url){
+      statusEl.textContent = "Pega un enlace válido de TikTok.";
+      return;
+    }
+
+    goBtn.disabled = true;
+    resultEl.classList.remove('show');
+    statusEl.innerHTML = '<span class="spinner"></span> Procesando vídeo...';
+
+    try {
+      const res = await fetch(`${API_URL}/api/tiktok/info?url=${encodeURIComponent(url)}`);
+      if(!res.ok) throw new Error("No se pudo procesar el enlace");
+
+      const data = await res.json();
+      data.sourceUrl = url;
+      currentData = data;
+      renderResult(data);
+      statusEl.textContent = "";
+    } catch (err) {
+      statusEl.textContent = "Error: revisa el enlace o inténtalo de nuevo.";
+      console.error(err);
+    } finally {
+      goBtn.disabled = false;
+    }
+  });
+
+  urlInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') goBtn.click();
+  });
+
+  // ---------- Render resultado ----------
+  function renderResult(data){
+    thumb.src = data.thumbnail || '';
+    metaTitle.textContent = data.title || 'Vídeo de TikTok';
+    metaAuthor.textContent = data.author ? `@${data.author}` : '';
+
+    // formatos de vídeo (hd/sd) que devuelve el backend
+    qualityRow.innerHTML = '';
+    const formats = data.formats && data.formats.length ? data.formats : [{quality:'Estándar', url:data.videoUrl}];
+
+    formats.forEach((f, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'quality-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = f.quality;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedQuality = f;
+        preview.src = f.url;
+      });
+      qualityRow.appendChild(btn);
+    });
+
+    selectedQuality = formats[0];
+    preview.src = selectedQuality.url;
+    resultEl.classList.add('show');
+  }
+
+  // ---------- Descargar vídeo ----------
+  downloadBtn.addEventListener('click', () => {
+    if(!selectedQuality || !currentData?.sourceUrl) return;
+    const backendUrl = `${API_URL}/api/tiktok/download?url=${encodeURIComponent(currentData.sourceUrl)}&height=${selectedQuality.height || ''}&kind=video`;
+    statusEl.innerHTML = '<span class="spinner"></span> Preparando descarga...';
+    triggerDownload(backendUrl);
+    addToHistory(currentData, selectedQuality.url, 'video');
+    setTimeout(() => statusEl.textContent = '', 3000);
+  });
+
+  audioBtn.addEventListener('click', () => {
+    if(!currentData?.sourceUrl){
+      showToast('Primero procesa un vídeo');
+      return;
+    }
+    const backendUrl = `${API_URL}/api/tiktok/download?url=${encodeURIComponent(currentData.sourceUrl)}&kind=audio`;
+    statusEl.innerHTML = '<span class="spinner"></span> Extrayendo audio...';
+    triggerDownload(backendUrl);
+    addToHistory(currentData, backendUrl, 'audio');
+    setTimeout(() => statusEl.textContent = '', 3000);
+  });
+
+  function triggerDownload(url){
+    const a = document.createElement('a');
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // ---------- Compartir ----------
+  shareBtn.addEventListener('click', async () => {
+    if(!selectedQuality) return;
+    const shareData = {
+      title: currentData?.title || 'Vídeo de TikTok',
+      text: 'Descargado con NovaDownloader',
+      url: selectedQuality.url
+    };
+    if(navigator.share){
+      try{ await navigator.share(shareData); }
+      catch(e){ /* usuario canceló, no hacer nada */ }
+    } else {
+      await navigator.clipboard.writeText(selectedQuality.url);
+      showToast('Tu navegador no soporta compartir nativo, enlace copiado');
+    }
+  });
+
+  // ---------- Copiar enlace ----------
+  copyBtn.addEventListener('click', async () => {
+    if(!selectedQuality) return;
+    try{
+      await navigator.clipboard.writeText(selectedQuality.url);
+      showToast('Enlace copiado');
+    }catch(e){
+      showToast('No se pudo copiar');
+    }
+  });
+
+  // ---------- Historial ----------
+  function getHistory(){
+    try{ return JSON.parse(localStorage.getItem('nova-history') || '[]'); }
+    catch(e){ return []; }
+  }
+  function saveHistory(list){
+    localStorage.setItem('nova-history', JSON.stringify(list.slice(0, 10)));
+  }
+  function addToHistory(data, url, type){
+    const list = getHistory();
+    list.unshift({
+      title: data.title || 'Vídeo de TikTok',
+      thumbnail: data.thumbnail || '',
+      url,
+      type,
+      date: new Date().toLocaleString()
+    });
+    saveHistory(list);
+    renderHistory();
+  }
+  function renderHistory(){
+    const list = getHistory();
+    if(!list.length){
+      historyList.innerHTML = '<div class="empty">Aún no hay descargas</div>';
+      return;
+    }
+    historyList.innerHTML = '';
+    list.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'history-item';
+      el.innerHTML = `
+        <img src="${item.thumbnail}" alt="">
+        <div class="h-title">${item.title}</div>
+        <a href="${item.url}" target="_blank">${item.type === 'audio' ? 'MP3' : 'Ver'}</a>
+      `;
+      historyList.appendChild(el);
+    });
+  }
+  clearHistoryBtn.addEventListener('click', () => {
+    localStorage.removeItem('nova-history');
+    renderHistory();
+    showToast('Historial borrado');
+  });
+
+  renderHistory();
+</script>
+
+</body>
+</html>
